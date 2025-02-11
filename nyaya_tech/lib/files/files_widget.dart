@@ -185,6 +185,7 @@ class _FilesWidgetState extends State<FilesWidget> {
       }
     }
   }
+  
 
   Future<void> cancelDownload() async {
     if (fileId.isNotEmpty) {
