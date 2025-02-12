@@ -73,22 +73,21 @@ class _FilesWidgetState extends State<FilesWidget> {
   @override
   void initState() {
     super.initState();
+
     IsolateNameServer.registerPortWithName(
         _port.sendPort, 'downloader_send_port');
 
     _port.listen((dynamic data) {
-  if (mounted) {
-    setState(() {
-      fileId = data[0];
-      status = DownloadTaskStatus.fromInt(data[1]);
-      progress = data[2];
+      if (mounted) {
+        setState(() {
+          fileId = data[0];
+          status = DownloadTaskStatus.fromInt(data[1]);
+          progress = data[2];
+        });
+      }
     });
-  }
-});
-
 
     FlutterDownloader.registerCallback(downloadCallback);
-
     _model = createModel(context, () => FilesModel());
     _future = fetchData();
   }
@@ -99,12 +98,12 @@ class _FilesWidgetState extends State<FilesWidget> {
     super.dispose();
   }
 
- static void downloadCallback(String id, int status, int progress) {
-  print("Download Callback - ID: $id, Status: $status, Progress: $progress");
-  final SendPort? send =
-      IsolateNameServer.lookupPortByName('downloader_send_port');
-  send?.send([id, status, progress]);
-}
+  static void downloadCallback(String id, int status, int progress) {
+    print("Download Callback - ID: $id, Status: $status, Progress: $progress");
+    final SendPort? send =
+        IsolateNameServer.lookupPortByName('downloader_send_port');
+    send?.send([id, status, progress]);
+  }
 
   Future<bool> requestPermission() async {
     if (Platform.isAndroid) {
@@ -185,7 +184,6 @@ class _FilesWidgetState extends State<FilesWidget> {
       }
     }
   }
-  
 
   Future<void> cancelDownload() async {
     if (fileId.isNotEmpty) {
@@ -615,7 +613,7 @@ class _FilesWidgetState extends State<FilesWidget> {
                                         return Padding(
                                           padding: const EdgeInsets.all(8),
                                           child: FileComponent(
-                                            document:
+                                            documents:
                                                 _model.listDocumentData[index],
                                             onDelete: () async {
                                               await _deleteFile();
@@ -632,10 +630,6 @@ class _FilesWidgetState extends State<FilesWidget> {
                                               }
                                             },
                                             onDownload: () async {
-                                              await _model
-                                                  .fetchDownloadFileData(
-                                                      key: SharedPrefernce
-                                                          .getfileKey());
                                               await downloadFile(); // Ensure state updates after this
                                               setState(
                                                   () {}); // Update UI after starting the download
@@ -646,72 +640,100 @@ class _FilesWidgetState extends State<FilesWidget> {
                                     ),
                                   ),
                                   if (status != null)
-  Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (status == DownloadTaskStatus.running || status == DownloadTaskStatus.paused)
-          Column(
-            children: [
-              LinearProgressIndicator(
-                value: progress > 0 ? progress / 100 : null, // Fix for build APK
-                minHeight: 5,
-                backgroundColor: Colors.grey[300],
-                color: Colors.blue,
-              ),
-              const SizedBox(height: 10),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500), // Ensures smooth updates
-                child: Text(
-                  "$progress% Downloaded",
-                  key: ValueKey<int>(progress), // Forces rebuild in release mode
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (status == DownloadTaskStatus.running)
-              ElevatedButton(
-                onPressed: pauseDownload,
-                child: const Text('Pause'),
-              ),
-            if (status == DownloadTaskStatus.paused)
-              ElevatedButton(
-                onPressed: resumeDownload,
-                child: const Text('Resume'),
-              ),
-            if (status != DownloadTaskStatus.complete)
-              ElevatedButton(
-                onPressed: cancelDownload,
-                child: const Text('Cancel'),
-              ),
-          ].divide(const SizedBox(width: 12)),
-        ),
-        if (status == DownloadTaskStatus.complete)
-          const Padding(
-            padding: EdgeInsets.only(top: 10),
-            child: Text(
-              'Download completed successfully',
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-      ],
-    ),
-  ),
-
-
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            if (status ==
+                                                    DownloadTaskStatus
+                                                        .running ||
+                                                status ==
+                                                    DownloadTaskStatus.paused)
+                                              Column(
+                                                children: [
+                                                  LinearProgressIndicator(
+                                                    value: progress /100,
+                                                         
+                                                    minHeight: 5,
+                                                    backgroundColor:
+                                                        Colors.grey[300],
+                                                    color: Colors.blue,
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  AnimatedSwitcher(
+                                                    duration: const Duration(
+                                                        milliseconds:
+                                                            500), // Ensures smooth updates
+                                                    child: Text(
+                                                      "$progress% Downloaded",
+                                                      // key: ValueKey<int>(
+                                                      //     progress), // Forces rebuild in release mode
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            const SizedBox(height: 20),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                if (status ==
+                                                    DownloadTaskStatus.failed)
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      await downloadFile();
+                                                      setState(
+                                                          () {}); // Ensure UI updates
+                                                    },
+                                                    child: const Text('Start'),
+                                                  ),
+                                                if (status ==
+                                                    DownloadTaskStatus.running)
+                                                  ElevatedButton(
+                                                    onPressed: pauseDownload,
+                                                    child: const Text('Pause'),
+                                                  ),
+                                                if (status ==
+                                                    DownloadTaskStatus.paused)
+                                                  ElevatedButton(
+                                                    onPressed: resumeDownload,
+                                                    child: const Text('Resume'),
+                                                  ),
+                                                if (status !=
+                                                    DownloadTaskStatus.complete)
+                                                  ElevatedButton(
+                                                    onPressed: cancelDownload,
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                              ].divide(
+                                                  const SizedBox(width: 12)),
+                                            ),
+                                            if (status ==
+                                                DownloadTaskStatus.complete)
+                                              const Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 10),
+                                                child: Text(
+                                                  'Download completed successfully',
+                                                  style: TextStyle(
+                                                    color: Colors.green,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               )
                             : Center(
