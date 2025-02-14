@@ -1,0 +1,3 @@
+-keep class vn.hunghd.flutterdownloader.** { *; }
+-keep class io.flutter.plugins.firebasemessaging.** { *; }
+-keep class com.dexterous.flutterlocalnotifications.** { *; }

@@ -95,6 +95,7 @@ class FileComponent extends StatelessWidget {
                         SharedPrefernce.sets3Url(documents.key.toString());
                         SharedPrefernce.setfileName(
                             documents.filename.toString());
+                         SharedPrefernce.setfileSize(documents.fileSize!.toInt());  
                         onDownload();
                       }
                     },
@@ -103,7 +104,7 @@ class FileComponent extends StatelessWidget {
                         value: 'Delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, color: Colors.red),
+                            // Icon(Icons.delete, color: Colors.red),
                             SizedBox(width: 8),
                             Text('Delete'),
                           ],
@@ -113,7 +114,7 @@ class FileComponent extends StatelessWidget {
                         value: 'Download',
                         child: Row(
                           children: [
-                            Icon(Icons.download, color: Colors.blue),
+                            // Icon(Icons.download, color: Colors.blue),
                             SizedBox(width: 8),
                             Text('Download'),
                           ],
