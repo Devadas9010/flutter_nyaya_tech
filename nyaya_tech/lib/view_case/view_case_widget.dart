@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:nyaya_tech/checklist/checklist_widget.dart';
 import 'package:nyaya_tech/components/details_screen_widget.dart';
 import 'package:nyaya_tech/components/menu_item_card.dart';
-import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
 import 'package:nyaya_tech/index.dart';
 import 'package:nyaya_tech/view_case/help_line.dart';
 import 'package:nyaya_tech/view_case/view_case_model.dart';
+import 'package:nyaya_tech/view_case/view_status_widget.dart';
 import 'package:popover/popover.dart';
 
 class ViewCaseWidget extends StatefulWidget {
@@ -179,7 +177,7 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                         ),
                       );
                     } else {
-                      String orginalText = '${_model.viewcase?.status ?? '--'}';
+                      String orginalText = _model.viewcase?.status ?? '--';
                       String formattedText = orginalText.replaceAll("_", " ");
                       return SingleChildScrollView(
                         child: Column(
@@ -300,6 +298,26 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                                             .withOpacity(0.5)),
                                               ),
                                       ),
+                                      InkWell(
+                                          onTap: () {
+                                            Navigator.push<void>(
+                                              context,
+                                              MaterialPageRoute<void>(
+                                                builder: (BuildContext
+                                                        context) =>
+                                                    const ViewStatusWidget(),
+                                              ),
+                                            );
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.remove_red_eye),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text('View Status'),
+                                            ],
+                                          ))
                                     ],
                                   ),
                                 ),
@@ -486,21 +504,19 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                               text:
                                   '${_model.viewcase!.lawyer?.firstName ?? '--'} ${_model.viewcase!.lawyer?.lastName ?? '--'}',
                               text1:
-                                  '${_model.viewcase!.lawyer?.designation ?? '--'}',
-                              text2:
-                                  '${_model.viewcase!.lawyer?.phone ?? '--'}',
-                              text4:
-                                  '${_model.viewcase!.lawyer?.email ?? '--'}',
+                                  _model.viewcase!.lawyer?.designation ?? '--',
+                              text2: _model.viewcase!.lawyer?.phone ?? '--',
+                              text4: _model.viewcase!.lawyer?.email ?? '--',
                               text3:
                                   '${_model.viewcase!.user?.firstName ?? '--'} ${_model.viewcase!.user?.lastName ?? '--'}',
                               text5: _model.viewcase!.user!.phone == null
                                   ? '--'
-                                  : '${_model.viewcase!.user?.phone ?? '--'}',
+                                  : _model.viewcase!.user?.phone ?? '--',
                               text6: _model.viewcase!.user?.email ?? '--',
                               imageUrl1: _model.viewcase!.user?.profilePic ??
                                   'https://images.unsplash.com/photo-1640960543409-dbe56ccc30e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw1fHx1c2VyfGVufDB8fHx8MTczNDM5MTUyMXww&ixlib=rb-4.0.3&q=80&w=1080',
-                              imageUrl:
-                                  '${_model.viewcase!.lawyer?.profilePic ?? 'https://static.vecteezy.com/system/resources/thumbnails/053/545/258/small/courtroom-scene-with-lawyer-presenting-argument-judge-observing-tense-and-focused-atmosphere-photo.jpg'}',
+                              imageUrl: _model.viewcase!.lawyer?.profilePic ??
+                                  'https://static.vecteezy.com/system/resources/thumbnails/053/545/258/small/courtroom-scene-with-lawyer-presenting-argument-judge-observing-tense-and-focused-atmosphere-photo.jpg',
                             ),
                             const HelpLineWidget(text: '1800-XXXX-XXXX')
                           ].divide(const SizedBox(height: 20)),

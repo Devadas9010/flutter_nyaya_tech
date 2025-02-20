@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/list_all_cases_api.dart';
-import 'package:nyaya_tech/cases/cases_widget.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
 import 'package:nyaya_tech/responses/list_all_Cases_response.dart';
 

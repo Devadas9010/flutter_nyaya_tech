@@ -91,8 +91,6 @@ class _FilesWidgetState extends State<FilesWidget> {
     }
   }
 
-  
-
   Future<void> fetchData() async {
     await _model.fetchListDocumentData();
   }
@@ -174,44 +172,35 @@ class _FilesWidgetState extends State<FilesWidget> {
     _future = fetchData();
     initializeBackgroundService();
   }
-@pragma('vm:entry-point')
+
+  @pragma('vm:entry-point')
   static void downloadCallback(String id, int status, int progress) {
     String _getStatusName(int statusCode) {
-    switch (statusCode) {
-      case 0:
-        return 'Undefined';
-      case 1:
-        return 'Enqueued';
-      case 2:
-        return 'Running';
-      case 3:
-        return 'Complete';
-      case 4:
-        return 'Failed';
-      case 5:
-        return 'Canceled';
-      case 6:
-        return 'Paused';
-      default:
-        return 'Unknown';
+      switch (statusCode) {
+        case 0:
+          return 'Undefined';
+        case 1:
+          return 'Enqueued';
+        case 2:
+          return 'Running';
+        case 3:
+          return 'Complete';
+        case 4:
+          return 'Failed';
+        case 5:
+          return 'Canceled';
+        case 6:
+          return 'Paused';
+        default:
+          return 'Unknown';
+      }
     }
-  }
-    String statusName =_getStatusName(status);
+    String statusName = _getStatusName(status);
     print("Download Callback - ID: $id, Status: $statusName, Progress: $progress");
 
     final SendPort? send = IsolateNameServer.lookupPortByName('downloader_send_port');
     send?.send([id, status, progress]);
   }
-
-
-
-
-
-
-
-
-  // Rest of the code remains the same...
-
 
   Future<void> initializeBackgroundService() async {
     final service = FlutterBackgroundService();
@@ -331,7 +320,7 @@ class _FilesWidgetState extends State<FilesWidget> {
       showProgress: true,
       maxProgress: 100,
       progress: progress,
-      indeterminate: progress==0,
+      indeterminate: progress == 0,
       actions: [
         if (status == DownloadTaskStatus.running)
           AndroidNotificationAction('pause', 'Pause', cancelNotification: false),
@@ -362,15 +351,15 @@ class _FilesWidgetState extends State<FilesWidget> {
   }
 
   Future<void> pauseDownload() async {
-  if (fileId.isNotEmpty) {
-    await FlutterDownloader.pause(taskId: fileId);
-    setState(() {
-      status = DownloadTaskStatus.paused;
-    });
-    await _updateNotification(fileId, 'Download Paused', 'Tap to resume');
-    print("Download paused: $fileId");
+    if (fileId.isNotEmpty) {
+      await FlutterDownloader.pause(taskId: fileId);
+      setState(() {
+        status = DownloadTaskStatus.paused;
+      });
+      await _updateNotification(fileId, 'Download Paused', 'Tap to resume');
+      print("Download paused: $fileId");
+    }
   }
-}
 
   Future<void> resumeDownload() async {
     if (fileId.isNotEmpty) {
@@ -386,16 +375,16 @@ class _FilesWidgetState extends State<FilesWidget> {
   }
 
   Future<void> cancelDownload() async {
-  if (fileId.isNotEmpty) {
-    await FlutterDownloader.cancel(taskId: fileId);
-    setState(() {
-      status = null;
-      fileId = "";
-    });
-    await flutterLocalNotificationsPlugin.cancel(0);
-    print("Download canceled: $fileId");
+    if (fileId.isNotEmpty) {
+      await FlutterDownloader.cancel(taskId: fileId);
+      setState(() {
+        status = null;
+        fileId = "";
+      });
+      await flutterLocalNotificationsPlugin.cancel(0);
+      print("Download canceled: $fileId");
+    }
   }
-}
 
   Future<void> _updateNotification(String id, String title, String body) async {
     AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -428,6 +417,7 @@ class _FilesWidgetState extends State<FilesWidget> {
       payload: id,
     );
   }
+
 
  
        

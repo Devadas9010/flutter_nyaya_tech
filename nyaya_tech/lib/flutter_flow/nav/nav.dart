@@ -1,21 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:nyaya_tech/checklist/checklist_widget.dart';
 import 'package:nyaya_tech/checklist/view_checklist_widget.dart';
 import 'package:nyaya_tech/data_components/bottom_bar.dart';
+import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/user_profile/update_user_profile_widget.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 import '/index.dart';
-import '/main.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/lat_lng.dart';
-import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'serialization_util.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
@@ -39,7 +33,10 @@ class AppStateNotifier extends ChangeNotifier {
 }
 
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
-      initialLocation: '/',
+      initialLocation: (SharedPrefernce.getAccessToken() != null &&
+              SharedPrefernce.getAccessToken().isNotEmpty)
+          ? '/bottomBar'
+          : '/',
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
@@ -150,6 +147,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/files',
           builder: (context, params) => const FilesWidget(),
         ),
+        // FFRoute(
+        //   name: 'ViewFiles',
+        //   path: '/Viewfiles',
+        //   builder: (context, params) => const ViewFileWidget(),
+        // ),
         FFRoute(
           name: 'cases',
           path: '/cases',

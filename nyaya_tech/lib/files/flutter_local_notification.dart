@@ -1,3 +1,882 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:nyaya_tech/backend/custom_response.dart';
+import 'package:nyaya_tech/backend/services/files_api.dart';
+import 'package:nyaya_tech/chat_box/chat_box_widget.dart';
+import 'package:nyaya_tech/classes/file_upload_class.dart';
+import 'package:nyaya_tech/components/file_component.dart';
+import 'package:nyaya_tech/components/menu_item_card.dart';
+import 'package:nyaya_tech/data_components/shared_preference.dart';
+import 'package:nyaya_tech/hearing_summary/hearing_summary_widget.dart';
+import 'package:nyaya_tech/logs/logs_widget.dart';
+import 'package:nyaya_tech/notes_screen/notes_screen_widget.dart';
+import 'package:nyaya_tech/responses/file_upload_response.dart';
+import 'package:nyaya_tech/view_case/view_case_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:popover/popover.dart';
+import 'package:http/http.dart' as http;
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'files_model.dart';
+export 'files_model.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+class FilesWidget extends StatefulWidget {
+  const FilesWidget({super.key});
+
+  @override
+  State<FilesWidget> createState() => _FilesWidgetState();
+}
+
+class _FilesWidgetState extends State<FilesWidget> {
+  late FilesModel _model;
+
+  String message = '';
+  bool isLoading = false;
+  bool Loading = false;
+  late Future<void> _future;
+  bool ishasMoreLoading = false;
+  bool isUploading = false;
+  String uploadMessage = "";
+  final Dio dio = Dio();
+  bool loading = false;
+  int progress = 0;
+  String? filePath;
+  ReceivePort _port = ReceivePort();
+  String fileId = "";
+  DownloadTaskStatus? status;
+  int fileSize = SharedPrefernce.getfileSize();
+  String s3Url = SharedPrefernce.gets3Url();
+  String fileName = SharedPrefernce.getfileName();
+  bool isPaused = false;
+  bool isCanceled = false;
+
+  Future<void> fetchData() async {
+    await _model.fetchListDocumentData();
+  }
+
+  Future<void> _deleteFile() async {
+    await _model.fetchDeleteFileData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _port = ReceivePort();
+
+    // Initialize Local Notifications
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveBackgroundNotificationResponse:
+            (NotificationResponse response) async {
+      switch (response.actionId) {
+        case 'pause':
+          pauseDownload();
+          break;
+        case 'resume':
+          resumeDownload();
+          break;
+        case 'cancel':
+          cancelDownload();
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Register download callback
+    IsolateNameServer.registerPortWithName(
+        _port.sendPort, 'downloader_send_port');
+
+    _port.listen((dynamic data) {
+      setState(() {
+        fileId = data[0];
+        status = DownloadTaskStatus.fromInt(data[1]);
+        progress = data[2];
+      });
+
+      if (status == DownloadTaskStatus.paused) {
+        showNotificationWithAction(fileId, 'Download Paused', progress);
+      } else if (status == DownloadTaskStatus.running) {
+        showNotificationWithAction(fileId, 'Downloading...', progress);
+      } else if (status == DownloadTaskStatus.failed) {
+        showNotificationWithAction(fileId, 'Download Failed', progress);
+      } else if (status == DownloadTaskStatus.complete) {
+        showDownloadCompleteNotification();
+      } else if (status == DownloadTaskStatus.canceled) {
+        showNotificationWithAction(fileId, 'Download Canceled', progress);
+      }
+    });
+
+    FlutterDownloader.registerCallback(downloadCallback);
+    _model = createModel(context, () => FilesModel());
+    _future = fetchData();
+    // initializeBackgroundService();
+  }
+
+  @pragma('vm:entry-point')
+  static void downloadCallback(String id, int status, int progress) {
+    final SendPort? send =
+        IsolateNameServer.lookupPortByName('downloader_send_port');
+    send?.send([id, status, progress]);
+  }
+
+  Future<bool> requestPermissions() async {
+    if (Platform.isAndroid) {
+      var status = await Permission.notification.request();
+      if (status.isDenied) {
+        return false;
+      }
+      if (await Permission.manageExternalStorage.isGranted) {
+        return true;
+      }
+    }
+    return true;
+  }
+
+  Future<void> downloadFile(String url, String fileName) async {
+    if (!await requestPermissions()) {
+      print('Permissions not granted');
+      return;
+    }
+    try {
+      String savePath = "/storage/emulated/0/Download/$fileName";
+      final taskId = await FlutterDownloader.enqueue(
+        url: url,
+        savedDir: "/storage/emulated/0/Download",
+        fileName: fileName,
+        showNotification: true,
+        openFileFromNotification: true,
+      );
+      setState(() {
+        fileId = taskId!;
+        status = DownloadTaskStatus.running;
+      });
+    } catch (e) {
+      print("Download error: $e");
+    }
+  }
+
+
+
+  void pauseDownload() async {
+    if (fileId.isNotEmpty) {
+      await FlutterDownloader.pause(taskId: fileId);
+      setState(() {
+        isPaused = true;
+        status = DownloadTaskStatus.paused;
+      });
+      showNotificationWithAction(fileId, 'Download Paused', progress);
+    }
+  }
+
+  void resumeDownload() async {
+    if (fileId.isNotEmpty) {
+      await FlutterDownloader.resume(taskId: fileId);
+      setState(() {
+        isPaused = false;
+        status = DownloadTaskStatus.running;
+      });
+      showNotificationWithAction(fileId, 'Download Resumed', progress);
+    }
+  }
+
+  void cancelDownload() async {
+    if (fileId.isNotEmpty) {
+      await FlutterDownloader.cancel(taskId: fileId);
+      setState(() {
+        isCanceled = true;
+        status = DownloadTaskStatus.canceled;
+      });
+      showNotificationWithAction(fileId, 'Download Canceled', progress);
+    }
+  }
+
+  void updateNotificationProgress(int progress) {
+    flutterLocalNotificationsPlugin.show(
+      0,
+      'Downloading',
+      'Progress: $progress%',
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'download_channel',
+          'Download Progress',
+          channelDescription: 'Downloading file...',
+          progress: progress,
+          maxProgress: 100,
+          ongoing: true,
+          showProgress: true,
+        ),
+      ),
+    );
+  }
+
+  void showDownloadCompleteNotification() {
+    flutterLocalNotificationsPlugin.show(
+      0,
+      'Download Complete',
+      'The file has been successfully downloaded.',
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'download_channel',
+          'Download Completed',
+          channelDescription: 'File downloaded successfully.',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  }
+
+  void showNotificationWithAction(
+      String fileId, String status, int progress) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'download_channel',
+      'Download Progress',
+      channelDescription: 'Download notifications.',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: false,
+      enableVibration: false,
+      showProgress: true,
+      maxProgress: 100,
+      progress: progress,
+      ongoing: true,
+      actions: [
+        if (status == 'Downloading...')
+          AndroidNotificationAction(
+            'pause',
+            'Pause',
+            // onPressed: () => pauseDownload(),
+          ),
+        if (status == 'Download Paused')
+          AndroidNotificationAction(
+            'resume',
+            'Resume',
+            // onPressed: () => resumeDownload(),
+          ),
+        AndroidNotificationAction(
+          'cancel',
+          'Cancel',
+          // onPressed: () => cancelDownload(),
+        ),
+      ],
+    );
+
+    var platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Downloading File',
+      '${fileSize > 0 ? _formatFileSize(((progress / 100) * fileSize).toInt()) : "Unknown"} / ${fileSize > 0 ? _formatFileSize(fileSize) : "Unknown"}',
+      platformChannelSpecifics,
+    );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes <= 0) return "0 MB";
+    const suffixes = ["B", "KB", "MB", "GB", "TB"];
+    final i = (log(bytes) / log(1024)).floor();
+    return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
+  }
+
+  @override
+  void dispose() {
+    IsolateNameServer.removePortNameMapping('downloader_send_port');
+    super.dispose();
+  }
+
+  FilePickerResult? selectedFiles;
+
+  Future<void> _uploadFile() async {
+    try {
+      setState(() {
+        isUploading = true;
+        isLoading = true; // Set loading true before upload starts
+        uploadMessage = "";
+      });
+
+      selectedFiles = await FilePicker.platform
+          .pickFiles(type: FileType.any, allowMultiple: true);
+
+      if (selectedFiles != null && selectedFiles!.files.isNotEmpty) {
+        for (PlatformFile file in selectedFiles!.files) {
+          setState(() {
+            uploadMessage = "Uploading ${file.name}...";
+          });
+
+          Uint8List? fileBytes;
+          if (file.bytes != null) {
+            fileBytes = file.bytes;
+          } else if (file.path != null) {
+            final pickedFile = File(file.path!);
+            fileBytes = await pickedFile.readAsBytes();
+          } else {
+            setState(() {
+              uploadMessage = "Unable to read content of ${file.name}.";
+            });
+            continue;
+          }
+
+          String base64Content = base64Encode(fileBytes!);
+          FileUploadClass fileUploadObject = FileUploadClass(
+            fileType: file.extension ?? 'unknown',
+            fileName: file.name,
+            fileSize: file.size,
+            fileContent: base64Content,
+          );
+
+          try {
+            CustomResponse<FilesUploadResponse> response =
+                await FilesUploadApi().call(fileClass: fileUploadObject);
+
+            if (response.statusCode == 200 || response.statusCode == 201) {
+              String s3Url = response.data!.data!.targetUrl.toString();
+              String fileKey = response.data!.data!.fileKey.toString();
+              SharedPrefernce.setfileKey(fileKey);
+              SharedPrefernce.sets3Url(s3Url);
+
+              bool isUpdated =
+                  await _updateS3Url(s3Url, fileBytes, file.extension);
+              await _model.fetchUploadDocumentsData(
+                  case_id: SharedPrefernce.getcaseId(),
+                  file_type: file.extension ?? '--',
+                  file_name: file.name,
+                  file_size: file.size,
+                  key: SharedPrefernce.getfileKey());
+
+              setState(() {
+                uploadMessage = isUpdated
+                    ? "${file.name} uploaded and updated on S3 successfully!"
+                    : "${file.name} uploaded but failed to update S3.";
+              });
+              isLoading = true;
+              await _model.fetchListDocumentData();
+            } else {
+              setState(() {
+                uploadMessage = "Failed to upload ${file.name}.";
+              });
+            }
+          } catch (e) {
+            debugPrint("Error uploading ${file.name}: $e");
+            setState(() {
+              uploadMessage =
+                  "An error occurred during upload of ${file.name}.";
+            });
+          }
+        }
+      } else {
+        setState(() {
+          uploadMessage = "No file selected.";
+        });
+      }
+    } catch (e) {
+      debugPrint("Error during file upload: $e");
+      setState(() {
+        uploadMessage = "An error occurred during file upload.";
+      });
+    } finally {
+      setState(() {
+        isUploading = false;
+        isLoading = false; // Ensure loading is set to false after completion
+      });
+    }
+  }
+
+  String _getMimeType(String? extension) {
+    switch (extension?.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xls':
+        return 'application/vnd.ms-excel';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<bool> _updateS3Url(
+      String s3Url, Uint8List fileContent, String? fileExtension) async {
+    try {
+      final response = await http.put(
+        Uri.parse(s3Url),
+        headers: {
+          'Content-Type': _getMimeType(fileExtension),
+        },
+        body: fileContent,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        // debugPrint("Failed to update S3 URL: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      // debugPrint("Error in PUT request: $e");
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        floatingActionButton: SizedBox(
+          height: 50,
+          width: 50,
+          child: Builder(
+            builder: (context) => FloatingActionButton(
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.zero)),
+              onPressed: () {
+                showPopover(
+                    context: context,
+                    bodyBuilder: (context) => Container(
+                          padding: const EdgeInsets.only(top: 30, bottom: 20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MenuItem(
+                                text: 'Case Details',
+                                color: Colors.white.withOpacity(0.5),
+                                ontap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: const ViewCaseWidget(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              MenuItem(
+                                  text: 'Files',
+                                  color: Colors.white.withOpacity(1.0),
+                                  ontap: () {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        PageTransition(
+                                          type: PageTransitionType.fade,
+                                          child: const FilesWidget(),
+                                        ));
+                                  }),
+                              MenuItem(
+                                text: 'Chat Box',
+                                color: Colors.white.withOpacity(0.5),
+                                ontap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: const ChatBoxWidget(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              MenuItem(
+                                text: 'Notes',
+                                color: Colors.white.withOpacity(0.5),
+                                ontap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: const NotesScreenWidget(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              MenuItem(
+                                text: 'Hearing Summary',
+                                color: Colors.white.withOpacity(0.5),
+                                ontap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: const HearingSummaryWidget(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              MenuItem(
+                                text: 'Logs',
+                                color: Colors.white.withOpacity(0.5),
+                                ontap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.fade,
+                                      child: const LogsWidget(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ].divide(const SizedBox(height: 16)),
+                          ),
+                        ),
+                    direction: PopoverDirection.left,
+                    width: 250,
+                    height: 230,
+                    arrowHeight: 15,
+                    arrowWidth: 30,
+                    backgroundColor: Colors.black);
+              },
+              backgroundColor: Colors.black,
+              elevation: 8,
+              child:
+                  const Icon(Icons.menu_rounded, color: Colors.white, size: 32),
+            ),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          top: true,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          context.pushNamed('View_case');
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            border: Border.all(
+                              color: FlutterFlowTheme.of(context).primaryText,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Generated code for this Container Widget...
+                      Container(
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          border: Border.all(
+                            color: FlutterFlowTheme.of(context).primaryText,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.help_outline_rounded,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 20,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Icon(
+                          Icons.grid_view,
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          size: 24.0,
+                        ),
+                        Icon(
+                          Icons.list_outlined,
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          size: 24.0,
+                        ),
+                      ].divide(const SizedBox(width: 12.0)),
+                    ),
+                    InkWell(
+                      onTap: isUploading ? null : _uploadFile,
+                      child: Container(
+                        decoration: BoxDecoration(color: Colors.black),
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isUploading)
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              else
+                                Icon(Icons.add, color: Colors.white, size: 18),
+                              SizedBox(
+                                  width:
+                                      8), // Spacing between icon/loading and text
+                              Text(
+                                isUploading ? 'Uploading...' : 'Upload',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'DM Sans',
+                                      color: Colors.white,
+                                      letterSpacing: 0,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: FutureBuilder(
+                    future:
+                        _future, // Ensure this is properly initialized in initState()
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: Colors.black),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/images/no_internet.svg',
+                                height: 100,
+                                width: 100,
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'No Connection',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return _model.listDocumentData.isNotEmpty
+                            ? Column(
+                                children: [
+                                  Expanded(
+                                    child: GridView.builder(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                      ),
+                                      itemCount: _model.listDocumentData.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: FileComponent(
+                                            documents:
+                                                _model.listDocumentData[index],
+                                            onDelete: () async {
+                                              await _deleteFile();
+                                              if (!_model.error &&
+                                                  _model.message.isNotEmpty) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute<void>(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        const FilesWidget(),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            onDownload: () async {
+                                              await downloadFile(
+                                                  s3Url, fileName);
+                                              setState(
+                                                  () {}); // Ensure UI updates
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                  // Download Progress UI
+                                  // if (status != null &&
+                                  //     status != DownloadTaskStatus.undefined)
+                                  //   Expanded(
+                                  //     child: Padding(
+                                  //       padding: const EdgeInsets.all(16.0),
+                                  //       child: Column(
+                                  //         mainAxisAlignment:
+                                  //             MainAxisAlignment.center,
+                                  //         children: [
+                                  //           if (status ==
+                                  //                   DownloadTaskStatus
+                                  //                       .running ||
+                                  //               status ==
+                                  //                   DownloadTaskStatus.paused)
+                                  //             Column(
+                                  //               children: [
+                                  //                 Text(
+                                  //                   '${fileSize != null ? _formatFileSize(((progress / 100) * fileSize).toInt()) : "Unknown"} / ${_formatFileSize(fileSize)}',
+                                  //                 ),
+                                  //                 LinearProgressIndicator(
+                                  //                   value: progress / 100,
+                                  //                   minHeight: 5,
+                                  //                   backgroundColor:
+                                  //                       Colors.grey[300],
+                                  //                   color: Colors.blue,
+                                  //                 ),
+                                  //                 const SizedBox(height: 10),
+                                  //                 AnimatedSwitcher(
+                                  //                   duration: const Duration(
+                                  //                       milliseconds: 500),
+                                  //                   child: Text(
+                                  //                     "$progress% Downloaded",
+                                  //                     style: const TextStyle(
+                                  //                       fontSize: 14,
+                                  //                       fontWeight:
+                                  //                           FontWeight.w500,
+                                  //                     ),
+                                  //                   ),
+                                  //                 ),
+                                  //               ],
+                                  //             ),
+                                  //           const SizedBox(height: 20),
+                                  //           Row(
+                                  //             mainAxisAlignment:
+                                  //                 MainAxisAlignment.center,
+                                  //             children: [
+                                  //               if (status ==
+                                  //                   DownloadTaskStatus.failed)
+                                  //                 ElevatedButton(
+                                  //                   onPressed: downloadFile
+                                  //                   child: const Text('Start'),
+                                  //                 ),
+                                  //               const SizedBox(width: 5),
+                                  //               if (status ==
+                                  //                   DownloadTaskStatus.running)
+                                  //                 ElevatedButton(
+                                  //                   onPressed: pauseDownload,
+                                  //                   child: const Text('Pause'),
+                                  //                 ),
+                                  //               const SizedBox(width: 10),
+                                  //               if (status ==
+                                  //                   DownloadTaskStatus.paused)
+                                  //                 ElevatedButton(
+                                  //                   onPressed: resumeDownload,
+                                  //                   child: const Text('Resume'),
+                                  //                 ),
+                                  //               const SizedBox(width: 10),
+                                  //               if (status !=
+                                  //                   DownloadTaskStatus.complete)
+                                  //                 ElevatedButton(
+                                  //                   onPressed: cancelDownload,
+                                  //                   child: const Text('Cancel'),
+                                  //                 ),
+                                  //             ],
+                                  //           ),
+                                  //           if (status ==
+                                  //               DownloadTaskStatus.complete)
+                                  //             const Padding(
+                                  //               padding:
+                                  //                   EdgeInsets.only(top: 10),
+                                  //               child: Text(
+                                  //                 'Download completed successfully',
+                                  //                 style: TextStyle(
+                                  //                   color: Colors.green,
+                                  //                   fontSize: 16,
+                                  //                   fontWeight: FontWeight.bold,
+                                  //                 ),
+                                  //               ),
+                                  //             ),
+                                  //         ],
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                ],
+                              )
+                            : const Center(
+                                child: Text('No Files'),
+                              );
+                      }
+                    },
+                  ),
+                ),
+                if (ishasMoreLoading)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Center(
+                        child: CircularProgressIndicator(color: Colors.black)),
+                  )
+              ].divide(const SizedBox(height: 24.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
 // import 'dart:convert';
 // import 'dart:io';
 // import 'dart:isolate';

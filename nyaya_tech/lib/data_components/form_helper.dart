@@ -5,15 +5,14 @@ class FormErrorHelper {
 
   FormErrorHelper({this.errors});
 
-  get hasErrors => this.errors != null;
+  get hasErrors => errors != null;
 
   bool hasError(String key) =>
-      hasErrors ? this.errors!.containsKey(key) : false;
+      hasErrors ? errors!.containsKey(key) : false;
 
   String? message(String key) {
     if (hasError(key)) {
-      dynamic errorElement = this
-          .errors!
+      dynamic errorElement = errors!
           .entries
           .firstWhereOrNull((element) => element.key == key);
       if (errorElement != null) {

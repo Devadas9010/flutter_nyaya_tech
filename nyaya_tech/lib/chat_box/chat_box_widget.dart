@@ -1,22 +1,12 @@
 import 'package:nyaya_tech/components/chat_card_component.dart';
-import 'package:nyaya_tech/components/menu_item_card.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/data_components/text_field_components.dart';
-import 'package:nyaya_tech/files/files_widget.dart';
-import 'package:nyaya_tech/hearing_summary/hearing_summary_widget.dart';
-import 'package:nyaya_tech/logs/logs_widget.dart';
-import 'package:nyaya_tech/notes_screen/notes_screen_widget.dart';
-import 'package:nyaya_tech/view_case/view_case_widget.dart';
-import 'package:popover/popover.dart';
 
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'chat_box_model.dart';
 export 'chat_box_model.dart';
 
@@ -287,8 +277,8 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                       hintText: "Type message",
                       prefixIcon: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 8.0), // Spacing
+                        children: const [
+                          SizedBox(width: 8.0), // Spacing
                           Icon(Icons.mic_none, color: Colors.black, size: 24.0),
                           SizedBox(width: 16.0),
                           Icon(Icons.image_outlined,

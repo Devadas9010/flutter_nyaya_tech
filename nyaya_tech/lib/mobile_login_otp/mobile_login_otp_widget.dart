@@ -3,12 +3,8 @@ import 'package:nyaya_tech/data_components/shared_preference.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'mobile_login_otp_model.dart';
 export 'mobile_login_otp_model.dart';
 

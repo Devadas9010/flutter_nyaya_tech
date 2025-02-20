@@ -1,7 +1,4 @@
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,100 +6,123 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import 'flutter_flow/flutter_flow_util.dart';
-import 'flutter_flow/nav/nav.dart';
-import 'index.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'flutter_flow/flutter_flow_theme.dart';
+import 'flutter_flow/flutter_flow_util.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+// @pragma('vm:entry-point')
+// void onStart(ServiceInstance service) async {
+//   // Background service logic
+//   if (service is AndroidServiceInstance) {
+//     service.on('setAsForeground').listen((event) {
+//       service.setAsForegroundService();
+//     });
 
-Future<void> requestPermissions() async {
-  // Request storage permission
-  if (await Permission.storage.request().isGranted) {
-    // print("Storage permission granted");
-  } else {
-    // print("Storage permission denied");
-  }
+//     service.on('setAsBackground').listen((event) {
+//       service.setAsBackgroundService();
+//     });
+//   }
 
-  // Request notification permission
-  if (await Permission.notification.request().isGranted) {
-    // print("Notification permission granted");
-  } else {
-    // print("Notification permission denied");
-  }
-}
+//   service.on('stopService').listen((event) {
+//     service.stopSelf();
+//   });
 
-Future<void> initializeNotifications() async {
-  const AndroidInitializationSettings androidInitializationSettings =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+//   // Example: Send a notification when the service starts
+//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//       FlutterLocalNotificationsPlugin();
+//   const AndroidNotificationDetails androidPlatformChannelSpecifics =
+//       AndroidNotificationDetails(
+//     'your_channel_id',
+//     'your_channel_name',
+//     importance: Importance.high,
+//     priority: Priority.high,
+//   );
+//   const NotificationDetails platformChannelSpecifics =
+//       NotificationDetails(android: androidPlatformChannelSpecifics);
+//   await flutterLocalNotificationsPlugin.show(
+//     0,
+//     'Background Service',
+//     'Service is running',
+//     platformChannelSpecifics,
+//   );
+// }
 
-  final InitializationSettings initializationSettings =
-      InitializationSettings(android: androidInitializationSettings);
+// @pragma('vm:entry-point')
+// Future<bool> onIosBackground(ServiceInstance service) async {
+//   // iOS background service logic
+//   return true;
+// }
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-}
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//     FlutterLocalNotificationsPlugin();
 
-@pragma('vm:entry-point')
-void onStart(ServiceInstance service) async {
-  // Your background service logic here
-  if (service is AndroidServiceInstance) {
-    service.on('setAsForeground').listen((event) {
-      service.setAsForegroundService();
-    });
+// Future<void> requestPermissions() async {
+//   // Request storage and notification permissions
+//   final storageStatus = await Permission.storage.request();
+//   final notificationStatus = await Permission.notification.request();
 
-    service.on('setAsBackground').listen((event) {
-      service.setAsBackgroundService();
-    });
-  }
+//   if (storageStatus.isGranted) {
+//     debugPrint("Storage permission granted");
+//   } else {
+//     debugPrint("Storage permission denied");
+//   }
 
-  service.on('stopService').listen((event) {
-    service.stopSelf();
-  });
-}
+//   if (notificationStatus.isGranted) {
+//     debugPrint("Notification permission granted");
+//   } else {
+//     debugPrint("Notification permission denied");
+//   }
+// }
 
-@pragma('vm:entry-point')
-Future<bool> onIosBackground(ServiceInstance service) async {
-  // Your iOS background service logic here
-  return true;
-}
 
-Future<void> initializeService() async {
-  final service = FlutterBackgroundService();
+// Future<void> initializeService() async {
+//   final service = FlutterBackgroundService();
 
-  await service.configure(
-    iosConfiguration: IosConfiguration(
-      autoStart: true,
-      onForeground: onStart,
-      onBackground: onIosBackground,
-    ),
-    androidConfiguration: AndroidConfiguration(
-      onStart: onStart,
-      isForegroundMode: true,
-      autoStart: true,
-      autoStartOnBoot: true,
-    ),
-  );
+//   await service.configure(
+//     iosConfiguration: IosConfiguration(
+//       autoStart: true,
+//       onForeground: onStart,
+//       onBackground: onIosBackground,
+//     ),
+//     androidConfiguration: AndroidConfiguration(
+//       onStart: onStart,
+//       isForegroundMode: true,
+//       autoStart: true,
+//       autoStartOnBoot: true,
+//       initialNotificationContent: "Service is running",
+//       initialNotificationTitle: "Background Service",
+//       foregroundServiceNotificationId: 1234,
+//     ),
+//   );
 
-  service.startService();
-}
+//   await service.startService();
+// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await requestPermissions();
-
-  await FlutterDownloader.initialize();
-
-  await initializeNotifications(); // Initialize notifications (flutter local notifications)
-  await initializeService();
-
+  // Initialize shared preferences
   await SharedPrefernce.init();
-  GoRouter.optionURLReflectsImperativeAPIs = true;
-  usePathUrlStrategy();
+
+  // Request permissions
+  // await requestPermissions();
+
+  // Initialize Flutter Downloader
+//   await FlutterDownloader.initialize(
+//     debug: true, // Set to true for debugging
+//   );
+//  await FlutterLocalNotificationsPlugin().initialize(
+//     InitializationSettings(
+//       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+//       // iOS: IOSInitializationSettings(),
+//     ));
+  
+
 
   await FlutterFlowTheme.initialize();
+
+  // Use path URL strategy for web
+  usePathUrlStrategy();
 
   runApp(MyApp());
 }
@@ -147,10 +167,6 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', '')],
-      theme: ThemeData(
-        brightness: Brightness.light,
-        useMaterial3: false,
-      ),
       themeMode: _themeMode,
       routerConfig: _router,
     );

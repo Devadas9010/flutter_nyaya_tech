@@ -4,19 +4,42 @@ import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/responses/list_all_Cases_response.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 
-class CaseCardWidget extends StatelessWidget {
+class CaseCardWidget extends StatefulWidget {
   final CaseCardData casedata;
   const CaseCardWidget({super.key, required this.casedata});
 
   @override
+  State<CaseCardWidget> createState() => _CaseCardWidgetState();
+}
+
+class _CaseCardWidgetState extends State<CaseCardWidget> {
+  int currentStage = 0;
+
+
+  @override
   Widget build(BuildContext context) {
-    String orginalText = '${casedata.status?? '--'}';
-    String formattedText = orginalText.replaceAll("_", " ");
+    String orginalText = widget.casedata.status ?? '--';
+    String status = orginalText.replaceAll("_", " ");
+
+    if (status == 'PRE BOARDING' || status== 'Pre Boarding') {
+      currentStage = 0;
+    } else if (status == 'ON BOARDING' || status== 'On Boarding') {
+      currentStage = 1;
+    } else if (status == 'CASE FILING' || status == 'Case Filing') {
+      currentStage = 2;
+    } else if (status == 'COURT PROCEEDINGS' || status == 'Court Proceedings') {
+      currentStage = 3;
+    } else if (status == 'TRAIL PHASE' || status == 'Trail Phase') {
+      currentStage = 4;
+    } else if (status == 'CASE CLOSURE' || status == 'Case Closure') {
+      currentStage = 5;
+    }
     return InkWell(
       onTap: () {
         context.pushNamed('View_case');
-        SharedPrefernce.setcaseId(casedata.id!.toInt());
+        SharedPrefernce.setcaseId(widget.casedata.id!.toInt());
         print('case id -- ${SharedPrefernce.getcaseId()}');
       },
       child: Container(
@@ -39,14 +62,13 @@ class CaseCardWidget extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Text(
-                        casedata.issue?.caseType?? '--',
+                        widget.casedata.issue?.caseType ?? '--',
                         overflow: TextOverflow.ellipsis,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               fontFamily: 'Plus Jakarta Sans',
                               letterSpacing: 0,
                             ),
                       ),
-                      //created
                     ),
                   ),
                   Flexible(
@@ -59,7 +81,7 @@ class CaseCardWidget extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: Text(
-                            formattedText,
+                            status,
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -75,6 +97,76 @@ class CaseCardWidget extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(
+              height: 7,
+            ),
+
+
+
+         SizedBox(
+  height: 30,
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: List.generate(6, (index) {
+      bool isCompleted = index < currentStage; // Green for completed stages
+      bool isCurrentStage = index == currentStage; // Orange border for current stage
+
+      return Expanded(
+        child: TimelineTile(
+          axis: TimelineAxis.horizontal,
+          isFirst: index == 0,
+          isLast: index == 5,
+          beforeLineStyle: LineStyle(
+            color: (index > 0 && index <= currentStage) ? Colors.green : Colors.grey,
+            thickness: 3, 
+          ),
+          afterLineStyle: LineStyle(
+            color: (index < currentStage) ? Colors.green : Colors.grey,
+            thickness: 3, 
+          ),
+          indicatorStyle: IndicatorStyle(
+            width: 23,
+            height: 23,
+            indicator: Container(
+              width: 23, 
+              height: 23, 
+              alignment: Alignment.center, // Center text properly
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCurrentStage
+                    ? Colors.white
+                    : (isCompleted ? Colors.green : Colors.grey), // Green for completed, Grey for pending
+                border: Border.all(
+                  color: isCurrentStage ? Colors.orange : Colors.transparent,
+                  width: isCurrentStage ? 3 : 0, // Border width affects alignment
+                ),
+              ),
+              child: FittedBox( 
+                child: Text(
+                  '${index + 1}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: isCurrentStage
+                        ? Colors.orange
+                        : (isCompleted ? Colors.white : Colors.black),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }),
+  ),
+),
+
+
+
+
+
+
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 8),
               child: Column(
@@ -87,7 +179,7 @@ class CaseCardWidget extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            casedata.issue?.issueTitle?? '--',
+                            widget.casedata.issue?.issueTitle ?? '--',
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -108,10 +200,10 @@ class CaseCardWidget extends StatelessWidget {
                           decoration: const BoxDecoration(
                             color: Color(0x32FFA800),
                           ),
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 6),
                           child: Text(
-                            casedata.priority?? '--',
+                            widget.casedata.priority ?? '--',
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -131,14 +223,16 @@ class CaseCardWidget extends StatelessWidget {
                               width: 35,
                               height: 35,
                               clipBehavior: Clip.antiAlias,
-                              decoration: const BoxDecoration(shape: BoxShape.circle),
+                              decoration:
+                                  const BoxDecoration(shape: BoxShape.circle),
                               child: Image.network(
-                                  casedata.lawyer?.profilePic?? 'https://static.vecteezy.com/system/resources/thumbnails/053/545/258/small/courtroom-scene-with-lawyer-presenting-argument-judge-observing-tense-and-focused-atmosphere-photo.jpg',
+                                  widget.casedata.lawyer?.profilePic ??
+                                      'https://static.vecteezy.com/system/resources/thumbnails/053/545/258/small/courtroom-scene-with-lawyer-presenting-argument-judge-observing-tense-and-focused-atmosphere-photo.jpg',
                                   fit: BoxFit.cover),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${casedata.lawyer?.firstName?? '--'} ${casedata.lawyer?.lastName?? '--'}',
+                              '${widget.casedata.lawyer?.firstName ?? '--'} ${widget.casedata.lawyer?.lastName ?? '--'}',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -158,7 +252,7 @@ class CaseCardWidget extends StatelessWidget {
                             height: 20, width: 20),
                         Text(
                           DateFormat('dd MMM yy')
-                              .format(casedata.createdAt!.toLocal()),
+                              .format(widget.casedata.createdAt!.toLocal()),
                           style: FlutterFlowTheme.of(context)
                               .bodyMedium
                               .override(
@@ -177,7 +271,8 @@ class CaseCardWidget extends StatelessWidget {
                 color: Color(0xFFE7E7E7),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,8 +286,6 @@ class CaseCardWidget extends StatelessWidget {
                               fontWeight: FontWeight.w300,
                             ),
                       ),
-
-                      
                     ),
                     Flexible(
                       child: Align(
@@ -200,9 +293,11 @@ class CaseCardWidget extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
-                            casedata.nextHearingDate == null
+                            widget.casedata.nextHearingDate == null
                                 ? '--'
-                                : DateFormat('dd MMM yyyy').format(DateTime.parse(casedata.nextHearingDate)),
+                                : DateFormat('dd MMM yyyy').format(
+                                    DateTime.parse(
+                                        widget.casedata.nextHearingDate)),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(

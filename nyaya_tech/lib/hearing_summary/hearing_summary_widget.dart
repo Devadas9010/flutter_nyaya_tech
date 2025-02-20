@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:nyaya_tech/components/hearing_summary_card_widget.dart';
 import 'package:nyaya_tech/components/menu_item_card.dart';
 
@@ -315,6 +314,7 @@ class _HearingSummaryWidgetState extends State<HearingSummaryWidget> {
                                         ),
                                       );
                                     }
+                                    return null;
                                   },
                                 )
                               : const Center(

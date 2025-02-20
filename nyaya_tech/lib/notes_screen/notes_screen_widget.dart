@@ -3,18 +3,14 @@ import 'package:nyaya_tech/components/menu_item_card.dart';
 import 'package:nyaya_tech/files/files_widget.dart';
 import 'package:nyaya_tech/hearing_summary/hearing_summary_widget.dart';
 import 'package:nyaya_tech/logs/logs_widget.dart';
-import 'package:nyaya_tech/responses/list_cases_notes_response.dart';
 import 'package:nyaya_tech/view_case/view_case_widget.dart';
 import 'package:popover/popover.dart';
 
 import '/components/notes_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'notes_screen_model.dart';
 
 export 'notes_screen_model.dart';
@@ -326,6 +322,7 @@ class _NotesScreenWidgetState extends State<NotesScreenWidget> {
                                           ),
                                         );
                                       }
+                                      return null;
                                     },
                                   )
                                 : const Center(child: Text('No - Notes'));

@@ -1,20 +1,10 @@
 import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/user_profile_api.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
-import 'package:nyaya_tech/responses/single_user_response.dart';
 import 'package:nyaya_tech/responses/view_user_profile_response.dart';
 
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class ViewProfileInformationModel extends FlutterFlowModel {
   @override

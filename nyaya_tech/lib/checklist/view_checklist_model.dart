@@ -6,16 +6,10 @@ import 'package:nyaya_tech/responses/create_checklist_response.dart';
 import 'package:nyaya_tech/responses/get_checklist_response.dart';
 import 'package:nyaya_tech/responses/update_checklist_response.dart';
 import 'package:nyaya_tech/responses/view_checklist_response.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class ViewChecklistModel extends FlutterFlowModel {
   TextEditingController controller = TextEditingController();

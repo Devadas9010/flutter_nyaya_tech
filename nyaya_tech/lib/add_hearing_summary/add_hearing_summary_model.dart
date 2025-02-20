@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/hearing_summary_api.dart';
 import 'package:nyaya_tech/responses/add_hearing_summary_response.dart';

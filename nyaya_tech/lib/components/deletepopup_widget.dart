@@ -1,15 +1,14 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'deletepopup_model.dart';
 export 'deletepopup_model.dart';
 
 class DeletepopupWidget extends StatefulWidget {
-  const DeletepopupWidget({super.key});
+  final dynamic onDelete;
+
+  const DeletepopupWidget({super.key, required this.onDelete});
 
   @override
   State<DeletepopupWidget> createState() => _DeletepopupWidgetState();
@@ -37,6 +36,11 @@ class _DeletepopupWidgetState extends State<DeletepopupWidget> {
     super.dispose();
   }
 
+
+Future<void> onDelete()async{
+  await _model.fetchDeleteFileData();
+
+}
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -161,8 +165,8 @@ class _DeletepopupWidgetState extends State<DeletepopupWidget> {
                     ),
                     Expanded(
                       child: FFButtonWidget(
-                        onPressed: () {
-                          print('Button pressed ...');
+                        onPressed: () async{
+                          await onDelete();
                         },
                         text: 'Delete',
                         options: FFButtonOptions(

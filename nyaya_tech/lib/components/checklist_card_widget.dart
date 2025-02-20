@@ -1,8 +1,6 @@
 import 'package:nyaya_tech/checklist/view_checklist_widget.dart';
-import 'package:nyaya_tech/components/checklist_card_model.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/responses/List_of_checklist_response.dart';
-import 'package:nyaya_tech/responses/view_checklist_response.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,5 @@
 import 'package:nyaya_tech/chat_box/chat_box_widget.dart';
 import 'package:nyaya_tech/checklist/checklist_model.dart';
-import 'package:nyaya_tech/components/case_card_widget.dart';
 import 'package:nyaya_tech/components/checklist_card_widget.dart';
 import 'package:nyaya_tech/components/menu_item_card.dart';
 import 'package:nyaya_tech/files/files_widget.dart';
@@ -12,15 +11,8 @@ import 'package:popover/popover.dart';
 
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class ListofchecklistWidget extends StatefulWidget {
   const ListofchecklistWidget({super.key});

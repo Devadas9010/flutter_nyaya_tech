@@ -2,7 +2,6 @@ import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/logs_api.dart';
 import 'package:nyaya_tech/responses/list_case_logs_response.dart';
 
-import '/components/logs_cards_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'logs_widget.dart' show LogsWidget;
 import 'package:flutter/material.dart';

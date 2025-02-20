@@ -2,9 +2,7 @@ import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/hearing_summary_api.dart';
 import 'package:nyaya_tech/responses/list_all_cases_hearing_summary_response.dart';
 
-import '/components/hearing_summary_card_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'hearing_summary_widget.dart' show HearingSummaryWidget;
 import 'package:flutter/material.dart';
 
 class HearingSummaryModel extends FlutterFlowModel {

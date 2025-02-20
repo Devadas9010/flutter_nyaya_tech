@@ -1,6 +1,5 @@
 import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/files_api.dart';
-import 'package:nyaya_tech/classes/add_note.dart';
 import 'package:nyaya_tech/classes/file_upload_class.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/responses/delete_file_response.dart';
@@ -96,6 +95,7 @@ class FilesModel extends FlutterFlowModel<FilesWidget> {
     } else {
       message = response.data!.message.toString();
     }
+    return null;
   }
 
   Future<void> fetchSingleDocumentData() async {

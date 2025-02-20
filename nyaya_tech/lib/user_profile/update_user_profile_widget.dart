@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 
@@ -141,7 +140,7 @@ class _UpdateUserProfileWidgetState extends State<UpdateUserProfileWidget> {
                           email: controller3.text.trim(),
                           phone: controller4.text.trim(),
                           address: controller5.text.trim(),
-                          dateOfBirth: controller6?.text?? '--',
+                          dateOfBirth: controller6.text?? '--',
                           gender: selectedGender,
                         );
                         setState(() {

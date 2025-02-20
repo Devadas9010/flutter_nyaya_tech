@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nyaya_tech/cases/cases_model.dart';
 import 'package:nyaya_tech/components/case_card_widget.dart';
-import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
-import 'package:nyaya_tech/responses/list_all_Cases_response.dart';
 
 class CasesWidget extends StatefulWidget {
   const CasesWidget({super.key});
@@ -103,10 +100,11 @@ class _CasesWidgetState extends State<CasesWidget> {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 12),
                                       child: CaseCardWidget(
-                                        casedata: _model.caseData[index],
+                                        casedata: _model.caseData[index], 
                                       ),
                                     );
                                   }
+                                  return null;
                                 },
                               )
                             : const Center(child: Text('No - Cases'));

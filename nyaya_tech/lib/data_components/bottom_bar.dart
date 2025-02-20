@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:nyaya_tech/add_hearing_summary/add_hearing_summary_model.dart';
 import 'package:nyaya_tech/cases/cases_widget.dart';
 import 'package:nyaya_tech/pages/login_page/home_page/home_widget.dart';
 import 'package:nyaya_tech/services_screens/service_widget.dart';

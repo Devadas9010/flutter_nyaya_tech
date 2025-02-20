@@ -1,6 +1,5 @@
 import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/user_profile_api.dart';
-import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/responses/single_user_response.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';

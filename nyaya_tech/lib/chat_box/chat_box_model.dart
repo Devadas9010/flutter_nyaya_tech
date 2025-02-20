@@ -33,6 +33,7 @@ class ChatBoxModel extends FlutterFlowModel<ChatBoxWidget> {
     else{
       return throw Exception('error');
     }
+    return null;
   }
 
 

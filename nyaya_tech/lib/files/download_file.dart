@@ -6,11 +6,12 @@ import 'package:nyaya_tech/backend/custom_response.dart';
 import 'package:nyaya_tech/backend/services/files_api.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/responses/download_file_response.dart';
-import 'package:nyaya_tech/responses/file_upload_response.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class DownloadFileScreen extends StatefulWidget {
+  const DownloadFileScreen({super.key});
+
   @override
   _DownloadFileScreenState createState() => _DownloadFileScreenState();
 }
@@ -160,7 +161,7 @@ class _DownloadFileScreenState extends State<DownloadFileScreen> {
     String? fileName = SharedPrefernce.getfileName();
    
 
-    if (s3Url == null || s3Url.isEmpty || fileName == null) {
+    if (s3Url.isEmpty) {
       setState(() {
         loading = false;
       });
@@ -172,7 +173,7 @@ class _DownloadFileScreenState extends State<DownloadFileScreen> {
 
     setState(() {
       loading = false;
-      filePath = downloaded ? "File saved : ${fileName}" : null;
+      filePath = downloaded ? "File saved : $fileName" : null;
     });
 
     if (downloaded) {

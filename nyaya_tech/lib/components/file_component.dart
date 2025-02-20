@@ -47,6 +47,7 @@ class FileComponent extends StatelessWidget {
       onTap: () {
         SharedPrefernce.setfileId(documents.id.toString());
         print('file id -- ${SharedPrefernce.getfileId()}');
+        // context.pushNamed('ViewFiles');
       },
       child: Container(
         decoration: BoxDecoration(

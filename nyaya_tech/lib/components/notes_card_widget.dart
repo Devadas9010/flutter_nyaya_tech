@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nyaya_tech/add_hearing_summary/add_hearing_summary_model.dart';
 import 'package:nyaya_tech/data_components/shared_preference.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
