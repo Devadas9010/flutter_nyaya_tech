@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437845119780",
+    "project_id": "nyaya-tech",
+    "storage_bucket": "nyaya-tech.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437845119780:android:c5fc0294c1bf649f9699b1",
+        "android_client_info": {
+          "package_name": "com.mycompany.nyayatech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRFxwK4BWR2q2ZtTeMvM5gbgARXUQYmnc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
