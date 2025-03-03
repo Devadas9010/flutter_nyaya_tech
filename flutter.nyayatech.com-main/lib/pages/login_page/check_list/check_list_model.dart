@@ -18,7 +18,7 @@ class ListofchecklistModel extends FlutterFlowModel {
 
   Future<void> fetchCheckListData({int?page,int?limit}) async {
     CustomResponse<CheckListResponse> response =
-        await ListCheckListApi().call(page: page,limit: limit);
+        await ListCheckListApi().call();
 
     if (response.statusCode == 200) {
       if (page == 1) {

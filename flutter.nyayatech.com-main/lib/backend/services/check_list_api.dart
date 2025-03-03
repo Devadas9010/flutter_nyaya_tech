@@ -10,13 +10,13 @@ import 'package:nyaya_tech/response/view_checkList_response.dart';
 
 class ListCheckListApi {
   Future<CustomResponse<CheckListResponse>> call(
-      {int? page, int? limit}) async {
+      ) async {
     ApiCallResponse response = await ApiManager.instance.makeApiCall(
       callName: 'List Check List',
       apiUrl: buildUrl('/cases/${SharedPrefernce.getcaseId()}/checklist'),
       headers: {'Authorization': "Bearer ${SharedPrefernce.getAccessToken()}"},
       callType: ApiCallType.GET,
-      params: {'page': page, 'page_size': limit},
+      params: {},
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

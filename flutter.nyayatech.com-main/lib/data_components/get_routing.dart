@@ -103,18 +103,18 @@ final getPages = [
       page: () => ViewHearingSummaryWidget(),
       transition: Transition.fade,
       transitionDuration: Duration(microseconds: 300)),
-  // GetPage(
-  //     name: Routes.step1,
-  //     page: () => Step1ScreenWidget(),
-  //     transition: Transition.fade),
-  // GetPage(
-  //     name: Routes.step2,
-  //     page: () => Step2ScreenWidget(),
-  //     transition: Transition.rightToLeft),
-  // GetPage(
-  //     name: Routes.step3,
-  //     page: () => Step3ScreenWidget(),
-  //     transition: Transition.rightToLeft),
+  GetPage(
+      name: Routes.step1,
+      page: () => Step1ScreenWidget(),
+      transition: Transition.fade),
+  GetPage(
+      name: Routes.step2,
+      page: () => Step2ScreenWidget(),
+      transition: Transition.rightToLeft),
+  GetPage(
+      name: Routes.step3,
+      page: () => Step3ScreenWidget(),
+      transition: Transition.rightToLeft),
   GetPage(
       name: Routes.otpPage,
       page: () => OtpPageWidget(),

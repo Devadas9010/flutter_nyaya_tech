@@ -12,8 +12,10 @@ import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_widgets.dart';
 import 'package:nyaya_tech/index.dart';
+import 'package:nyaya_tech/pages/login_page/check_list/check_list_widget.dart';
 import 'package:nyaya_tech/pages/login_page/kyc_upload/kyc_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/case_number_widget.dart';
+import 'package:nyaya_tech/pages/login_page/view_case/drafting_and_signing_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/help_line.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/view_case_model.dart';
 import 'package:popover/popover.dart';
@@ -265,18 +267,18 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                     );
                                   },
                                 ),
-                                // MenuItem(
-                                //     text: 'List of Documents',
-                                //     color: Colors.white.withOpacity(0.5),
-                                //     ontap: () {
-                                //       Get.back();
-                                //       Navigator.push(
-                                //         context,
-                                //         PageTransition(
-                                //             type: PageTransitionType.fade,
-                                //             child: ListofchecklistWidget()),
-                                //       );
-                                //     }),
+                                MenuItem(
+                                    text: 'List of Documents',
+                                    color: Colors.white.withOpacity(0.5),
+                                    ontap: () {
+                                      Get.back();
+                                      Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            child: ListofchecklistWidget()),
+                                      );
+                                    }),
                                 MenuItem(
                                   text: 'Chat Box',
                                   color: Colors.white.withOpacity(0.5),
@@ -469,6 +471,7 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                                 size: 24),
                                           ),
                                         )),
+                                   
                                     Container(
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
@@ -501,6 +504,7 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                         )
                                       ],
                                     ),
+                                    
                                     InkWell(
                                       onTap: () {
                                         Get.toNamed(Routes.stageScreen);
@@ -523,6 +527,34 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                     )
                                   ],
                                 ),
+                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                   children: [
+                                     InkWell(
+                                          onTap: () {
+                                            Navigator.push<void>(
+                                              context,
+                                              MaterialPageRoute<void>(
+                                                builder: (BuildContext context) =>
+                                                    const DraftingWidget(),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: FlutterFlowTheme.of(context)
+                                                  .secondaryBackground,
+                                              border: Border.all(
+                                                  color: Colors.black, width: 1),
+                                            ),
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8),
+                                              child: Text('Drafting and Signing'),
+                                            ),
+                                          ),
+                                        ),
+                                   ],
+                                 ),
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Color(0xFFF0F4FA),

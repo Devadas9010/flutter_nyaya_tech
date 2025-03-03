@@ -94,6 +94,7 @@ class _WelcomeScreenWidgetState extends State<WelcomeScreenWidget> {
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         key: scaffoldKey,
         backgroundColor: Colors.white,
         body: SafeArea(

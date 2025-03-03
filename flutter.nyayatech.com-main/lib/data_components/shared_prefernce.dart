@@ -369,12 +369,12 @@ class SharedPrefernce {
     return preferences.setString(dataListKey, jsonString);
   }
 
-  // static List<Map<String, String>> getDataList() {
-  //   String? jsonString = preferences.getString(dataListKey);
-  //   List<dynamic> jsonList = jsonDecode(jsonString);
-  //   return jsonList.map((e) => Map<String, String>.from(e)).toList();
-  //     return [];
-  // }
+  static List<Map<String, String>> getDataList() {
+    String? jsonString = preferences.getString(dataListKey);
+    List<dynamic> jsonList = jsonDecode(jsonString!);
+    return jsonList.map((e) => Map<String, String>.from(e)).toList();
+     
+  }
 
   static Future<bool> remove(String key) async => await preferences.remove(key);
 
