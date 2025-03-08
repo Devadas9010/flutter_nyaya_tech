@@ -46,6 +46,7 @@ class SingleDox {
   DateTime? createdAt;
   dynamic updatedAt;
   dynamic deletedAt;
+  String?downloadurl;
 
   SingleDox({
     this.id,
@@ -58,6 +59,7 @@ class SingleDox {
     this.createdAt,
     this.updatedAt,
     this.deletedAt,
+    this.downloadurl
   });
 
   factory SingleDox.fromJson(Map<String, dynamic> json) => SingleDox(
@@ -73,6 +75,7 @@ class SingleDox {
             : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"],
         deletedAt: json["deleted_at"],
+        downloadurl: json["download_url"]
       );
 
   Map<String, dynamic> toJson() => {
@@ -86,5 +89,6 @@ class SingleDox {
         "created_at": createdAt?.toIso8601String(),
         "updated_at": updatedAt,
         "deleted_at": deletedAt,
+        "download_url":downloadurl
       };
 }

@@ -16,7 +16,7 @@ class CaseDoxApi {
       apiUrl: buildUrl('/cases/${SharedPrefernce.getcaseId()}/docs'),
       callType: ApiCallType.GET,
       headers: {'Authorization': "Bearer ${SharedPrefernce.getAccessToken()}"},
-      params: {'page': page, 'page_size': limit},
+      params: {'page': page, 'page_size': limit,"is_requested":false},
       bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,

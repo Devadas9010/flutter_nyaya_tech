@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:excel/excel.dart';
 import 'package:get/get.dart';
+import 'package:nyaya_tech/data_components/shared_prefernce.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_model.dart';
 import 'package:nyaya_tech/pages/login_page/files/files_model.dart';
 import 'package:docx_file_viewer/docx_file_viewer.dart';
@@ -52,6 +53,8 @@ class _PreviewWidgetState extends State<PreviewWidget> {
   }
 
   Widget _buildFilePreview(String fileType, String? fileUrl) {
+    print('fileType -- ${fileType}');
+    print('fileUrl -- ${fileUrl}');
     switch (fileType.toLowerCase()) {
       case 'jpeg':
       case 'png':
@@ -189,6 +192,8 @@ class _PreviewWidgetState extends State<PreviewWidget> {
         leading: IconButton(
           onPressed: () {
             Get.back();
+            SharedPrefernce.setsdownloadS3Url('');
+            SharedPrefernce.setdownloadfileName('');
           },
           icon: const Icon(Icons.arrow_back, color: Colors.black),
         ),
@@ -198,14 +203,14 @@ class _PreviewWidgetState extends State<PreviewWidget> {
           future: _fetchFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator(color: Colors.black,));
             } else if (snapshot.hasError) {
               return const Center(child: Text('No Connection'));
             } else if (_model.singleDox == null) {
               return const Center(child: Text('No Data Available'));
             } else {
               final fileType = _model.singleDox!.fileType ?? '';
-              final fileUrl = _model.singleDox!.key;
+              final fileUrl = _model.singleDox!.downloadurl;
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(0),

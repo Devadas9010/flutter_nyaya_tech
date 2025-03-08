@@ -17,7 +17,9 @@ import 'package:nyaya_tech/pages/login_page/kyc_upload/kyc_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/case_number_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/drafting_and_signing_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/help_line.dart';
+import 'package:nyaya_tech/pages/login_page/view_case/signing_and_upload_widget.dart';
 import 'package:nyaya_tech/pages/login_page/view_case/view_case_model.dart';
+import 'package:nyaya_tech/response/case_stage_response.dart';
 import 'package:popover/popover.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -35,6 +37,7 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
   bool refreshLoading = false;
   bool hasMore = true;
   late Future<void> _future;
+  late Future<void> _future2;
   final animationsMap = <String, AnimationInfo>{};
 
   @override
@@ -43,6 +46,7 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
     _model = createModel(context, () => ViewCaseModel());
     // print("Data -- ${SharedPrefernce.getDataList()}");
     _future = fetchdata();
+    _future2 = fetchStagesData();
     animationsMap.addAll({
       'rowOnPageLoadAnimation': AnimationInfo(
         trigger: AnimationTrigger.onPageLoad,
@@ -201,6 +205,10 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
 
   Future<void> fetchdata() async {
     await _model.fetchViewCase();
+  }
+
+  Future<void> fetchStagesData() async {
+    await _model.fetchCaseStagesData();
   }
 
   Future<void> _refresh(BuildContext context) async {
@@ -471,7 +479,6 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                                 size: 24),
                                           ),
                                         )),
-                                   
                                     Container(
                                       decoration: BoxDecoration(
                                         color: FlutterFlowTheme.of(context)
@@ -504,7 +511,6 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                         )
                                       ],
                                     ),
-                                    
                                     InkWell(
                                       onTap: () {
                                         Get.toNamed(Routes.stageScreen);
@@ -527,106 +533,231 @@ class _ViewCaseWidgetState extends State<ViewCaseWidget> {
                                     )
                                   ],
                                 ),
-                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                   children: [
-                                     InkWell(
-                                          onTap: () {
-                                            Navigator.push<void>(
-                                              context,
-                                              MaterialPageRoute<void>(
-                                                builder: (BuildContext context) =>
-                                                    const DraftingWidget(),
-                                              ),
-                                            );
-                                          },
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context)
-                                                  .secondaryBackground,
-                                              border: Border.all(
-                                                  color: Colors.black, width: 1),
-                                            ),
-                                            child: Padding(
-                                              padding: EdgeInsets.all(8),
-                                              child: Text('Drafting and Signing'),
-                                            ),
-                                          ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [],
+                                ),
+                               _model.stagesdata![3].isCompleted == true &&
+                                    _model.stagesdata![4].isCompleted == false
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFF0F4FA),
                                         ),
-                                   ],
-                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFF0F4FA),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Icon(
-                                              Icons.error_outline,
-                                              color: Color(0xFFEB5757),
-                                              size: 20,
-                                            ),
-                                            Text(
-                                              'Upload your aadhar And selfie',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
+                                        child: Padding(
+                                          padding: EdgeInsets.all(12),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  Icon(
+                                                    Icons.error_outline,
+                                                    color: Color(0xFFEB5757),
+                                                    size: 20,
+                                                  ),
+                                                  Text(
+                                                    'Upload your Aadhar and Selfie',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'DM Sans',
+                                                          color:
+                                                              Color(0xB3000000),
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                ].divide(SizedBox(width: 8)),
+                                              ),
+                                              FFButtonWidget(
+                                                onPressed: () {
+                                                  Navigator.push(context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                    return AadharWidget();
+                                                  }));
+                                                },
+                                                text: 'Upload',
+                                                options: FFButtonOptions(
+                                                  height: 40,
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(16, 0, 16, 0),
+                                                  iconPadding:
+                                                      EdgeInsetsDirectional
+                                                          .fromSTEB(0, 0, 0, 0),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  textStyle: FlutterFlowTheme
+                                                          .of(context)
+                                                      .titleSmall
                                                       .override(
                                                         fontFamily: 'DM Sans',
-                                                        color:
-                                                            Color(0xB3000000),
+                                                        color: Colors.white,
+                                                        fontSize: 12,
                                                         letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
-                                            ),
-                                          ].divide(SizedBox(width: 8)),
-                                        ),
-                                        FFButtonWidget(
-                                          onPressed: () {
-                                            Navigator.push(context,
-                                                MaterialPageRoute(
-                                                    builder: (context) {
-                                              return AadharWidget();
-                                            }));
-                                          },
-                                          text: 'Upload',
-                                          options: FFButtonOptions(
-                                            height: 40,
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    16, 0, 16, 0),
-                                            iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0, 0, 0, 0),
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      fontFamily: 'DM Sans',
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                            elevation: 0,
-                                            borderRadius:
-                                                BorderRadius.circular(0),
+                                                  elevation: 0,
+                                                  borderRadius:
+                                                      BorderRadius.circular(0),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                      )
+                                    : Container(),
+                                _model.stagesdata![9].isCompleted == true
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFF0F4FA),
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(12),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  Icon(
+                                                    Icons.error_outline,
+                                                    color: Color(0xFFEB5757),
+                                                    size: 20,
+                                                  ),
+                                                  Text(
+                                                    'Signing and Upload',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'DM Sans',
+                                                          color:
+                                                              Color(0xB3000000),
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                ].divide(SizedBox(width: 8)),
+                                              ),
+                                              FFButtonWidget(
+                                                onPressed: () {
+                                                  Navigator.push(context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                    return SigningWidget();
+                                                  }));
+                                                },
+                                                text: 'Sign',
+                                                options: FFButtonOptions(
+                                                  height: 40,
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(16, 0, 16, 0),
+                                                  iconPadding:
+                                                      EdgeInsetsDirectional
+                                                          .fromSTEB(0, 0, 0, 0),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  textStyle: FlutterFlowTheme
+                                                          .of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily: 'DM Sans',
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                  elevation: 0,
+                                                  borderRadius:
+                                                      BorderRadius.circular(0),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFF0F4FA),
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(12),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  Icon(
+                                                    Icons.error_outline,
+                                                    color: Color(0xFFEB5757),
+                                                    size: 20,
+                                                  ),
+                                                  Text(
+                                                    'Drafting and Signing',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'DM Sans',
+                                                          color:
+                                                              Color(0xB3000000),
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                ].divide(SizedBox(width: 8)),
+                                              ),
+                                              FFButtonWidget(
+                                                onPressed: () {
+                                                  Navigator.push(context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) {
+                                                    return DraftingWidget();
+                                                  }));
+                                                },
+                                                text: 'Draft',
+                                                options: FFButtonOptions(
+                                                  height: 40,
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(16, 0, 16, 0),
+                                                  iconPadding:
+                                                      EdgeInsetsDirectional
+                                                          .fromSTEB(0, 0, 0, 0),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  textStyle: FlutterFlowTheme
+                                                          .of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily: 'DM Sans',
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                  elevation: 0,
+                                                  borderRadius:
+                                                      BorderRadius.circular(0),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                 CaseNumberWidget(),
                                 Container(
                                   width: double.infinity,

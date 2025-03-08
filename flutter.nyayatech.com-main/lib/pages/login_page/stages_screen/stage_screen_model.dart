@@ -43,7 +43,6 @@ class StatusProductsModel extends FlutterFlowModel<StatusProductsWidget> {
   @override
   void initState(BuildContext context) {}
   List<Stages>? stagesdata = [];
-  Stages? stage;
   @override
   void dispose() {}
 

@@ -27,3 +27,30 @@ class CaseStageApi {
         response.statusCode);
   }
 }
+
+
+class CaseStagesApi {
+  Future<CustomResponse<CaseStageResponse>> call() async {
+    ApiCallResponse response = await ApiManager.instance.makeApiCall(
+        callName: 'Case_Stage',
+        apiUrl: buildUrl('/cases/${SharedPrefernce.getcaseId()}/case-stages'),
+        headers: {
+          'Authorization': "Bearer ${SharedPrefernce.getAccessToken()}"
+        },
+        params: {
+          // "stage": "Case Filing",
+          // "sub_stage": "Drafting and Signing approval",
+          // "is_completed": true,
+        },
+        callType: ApiCallType.GET,
+        bodyType: BodyType.JSON,
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: false);
+
+    return CustomResponse.completed(
+        await compute(caseStageResponseFromJson, jsonEncode(response.jsonBody)),
+        response.statusCode);
+  }
+}

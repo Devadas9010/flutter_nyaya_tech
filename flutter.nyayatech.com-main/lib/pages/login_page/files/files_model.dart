@@ -103,7 +103,7 @@ class FilesModel extends FlutterFlowModel {
     }
   }
 
-  Future<void> fetchSingle() async {
+  Future<void> fetchSingle() async { //for Preview files
     CustomResponse<SingleDoxResponse> response = await ViewSingleDox().call();
     if (response.statusCode == 200) {
       singleDox = response.data!.data;
@@ -153,4 +153,8 @@ class FilesModel extends FlutterFlowModel {
       fileUploadCameraProgress = false;
     }
   }
+
+
+
+  
 }

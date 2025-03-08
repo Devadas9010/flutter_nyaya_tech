@@ -57,7 +57,7 @@ class Data {
 }
 
 class PaginationInfo {
-    int? totalDocumentss;
+    int? totalRecords;
     int? totalPages;
     int? pageSize;
     int? currentPage;
@@ -65,7 +65,7 @@ class PaginationInfo {
     dynamic prevPage;
 
     PaginationInfo({
-        this.totalDocumentss,
+        this.totalRecords,
         this.totalPages,
         this.pageSize,
         this.currentPage,
@@ -74,7 +74,7 @@ class PaginationInfo {
     });
 
     factory PaginationInfo.fromJson(Map<String, dynamic> json) => PaginationInfo(
-        totalDocumentss: json["total_records"],
+        totalRecords: json["total_records"],
         totalPages: json["total_pages"],
         pageSize: json["page_size"],
         currentPage: json["current_page"],
@@ -83,7 +83,7 @@ class PaginationInfo {
     );
 
     Map<String, dynamic> toJson() => {
-        "total_records": totalDocumentss,
+        "total_records": totalRecords,
         "total_pages": totalPages,
         "page_size": pageSize,
         "current_page": currentPage,
@@ -94,6 +94,7 @@ class PaginationInfo {
 
 class Documents {
     int? id;
+    int? caseId;
     String? key;
     dynamic desc;
     String? fileName;
@@ -102,20 +103,22 @@ class Documents {
     bool? isRequested;
     dynamic requestedBy;
     String? uploadStatus;
-    dynamic verificationStatus;
+    String? verificationStatus;
     dynamic verifiedAt;
     dynamic verifiedBy;
     dynamic category;
-    dynamic caseStage;
-    dynamic caseSubStage;
-    int? caseId;
-    dynamic uploadedBy;
+    String? caseStage;
+    String? caseSubStage;
+    int? commentsCount;
+    int? uploadedBy;
     DateTime? createdAt;
     dynamic updatedAt;
     dynamic deletedAt;
+    String? downloadUrl;
 
     Documents({
         this.id,
+        this.caseId,
         this.key,
         this.desc,
         this.fileName,
@@ -130,15 +133,17 @@ class Documents {
         this.category,
         this.caseStage,
         this.caseSubStage,
-        this.caseId,
+        this.commentsCount,
         this.uploadedBy,
         this.createdAt,
         this.updatedAt,
         this.deletedAt,
+        this.downloadUrl,
     });
 
     factory Documents.fromJson(Map<String, dynamic> json) => Documents(
         id: json["id"],
+        caseId: json["case_id"],
         key: json["key"],
         desc: json["desc"],
         fileName: json["file_name"],
@@ -153,15 +158,17 @@ class Documents {
         category: json["category"],
         caseStage: json["case_stage"],
         caseSubStage: json["case_sub_stage"],
-        caseId: json["case_id"],
+        commentsCount: json["comments_count"],
         uploadedBy: json["uploaded_by"],
         createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
         updatedAt: json["updated_at"],
         deletedAt: json["deleted_at"],
+        downloadUrl: json["download_url"],
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
+        "case_id": caseId,
         "key": key,
         "desc": desc,
         "file_name": fileName,
@@ -176,10 +183,11 @@ class Documents {
         "category": category,
         "case_stage": caseStage,
         "case_sub_stage": caseSubStage,
-        "case_id": caseId,
+        "comments_count": commentsCount,
         "uploaded_by": uploadedBy,
         "created_at": createdAt?.toIso8601String(),
         "updated_at": updatedAt,
         "deleted_at": deletedAt,
+        "download_url": downloadUrl,
     };
 }

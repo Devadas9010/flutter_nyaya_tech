@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -5,19 +8,24 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
+import 'package:nyaya_tech/backend/custom_response.dart';
+import 'package:nyaya_tech/backend/services/files_upload_api.dart';
 import 'package:nyaya_tech/components/menu_item.dart';
 import 'package:nyaya_tech/data_components/delete_component.dart';
 import 'package:nyaya_tech/data_components/error_snackbar.dart';
 import 'package:nyaya_tech/data_components/file_component.dart';
 import 'package:nyaya_tech/data_components/get_routing.dart';
 import 'package:nyaya_tech/data_components/shared_prefernce.dart';
+import 'package:nyaya_tech/dtos/file_upload_dto.dart';
 import 'package:nyaya_tech/pages/login_page/files/files_model.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_theme.dart';
 import 'package:nyaya_tech/flutter_flow/flutter_flow_util.dart';
 import 'package:nyaya_tech/index.dart';
 import 'package:nyaya_tech/response/caes_dox_response.dart';
+import 'package:nyaya_tech/response/s3_upload_respons.dart';
 import 'package:popover/popover.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:http/http.dart' as http;
 
 class FilesWidget extends StatefulWidget {
   const FilesWidget({super.key});
@@ -40,6 +48,9 @@ class _FilesWidgetState extends State<FilesWidget> {
   late Future<void> _future;
   bool fileUploadCameraProgress = false;
   bool fileUploadProgress = false;
+  bool isUploading=false;
+  bool isLoading=false;
+  String uploadMessage="";
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -100,6 +111,114 @@ class _FilesWidgetState extends State<FilesWidget> {
       refreshLoading = false;
     });
   }
+
+
+Future<void> _uploadFile({XFile?file}) async {
+    try {
+      setState(() {
+        isUploading = true;
+        isLoading = true;
+        uploadMessage = "";
+      });
+
+      final selectedFiles = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: true,
+      );
+
+      if (selectedFiles != null && selectedFiles.files.isNotEmpty) {
+        for (PlatformFile file in selectedFiles.files) {
+          setState(() => uploadMessage = "Uploading ${file.name}...");
+
+          Uint8List? fileBytes =
+              file.bytes ?? await File(file.path!).readAsBytes();
+          String base64Content = base64Encode(fileBytes);
+
+          FileUploadDto fileUploadObject = FileUploadDto(
+            fileType: file.extension ?? 'unknown',
+            fileName: file.name,
+            fileSize: file.size,
+            fileContent: base64Content,
+          );
+
+          CustomResponse<S3UploadResponse> response =
+              await FilesUploadApi().call(fileDto: fileUploadObject);
+
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            String s3Url = response.data!.data!.targetUrl.toString();
+            String fileKey = response.data!.data!.fileKey.toString();
+
+            SharedPrefernce.setfileKey(fileKey);
+            SharedPrefernce.sets3Url(s3Url);
+
+            bool isUpdated =
+                await _updateS3Url(s3Url, fileBytes, file.extension);
+
+            await _model.fetchUploadKey(
+              // case_id: SharedPrefernce.getcaseId(),
+              fileType: file.extension ?? '--',
+              // stage: "Case Filing",
+              // sub_stage: "Signing",
+              fileName: file.name,
+              fileSize: file.size,
+              key: fileKey,
+            );
+
+            setState(() {
+              uploadMessage = isUpdated
+                  ? "${file.name} uploaded successfully!"
+                  : "${file.name} uploaded but failed to update S3.";
+            });
+          }
+        }
+        isLoading=true;
+        await fetchdata();
+        // await fetchData(); // Refresh the list after upload
+      }
+    } catch (e) {
+      setState(() => uploadMessage = "Error uploading file: $e");
+    } finally {
+      setState(() {
+        isUploading = false;
+        isLoading = false;
+      });
+    }
+  }
+
+  String _getMimeType(String? extension) {
+    switch (extension?.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<bool> _updateS3Url(
+      String s3Url, Uint8List fileContent, String? fileExtension) async {
+    try {
+      final response = await http.put(
+        Uri.parse(s3Url),
+        headers: {'Content-Type': _getMimeType(fileExtension)},
+        body: fileContent,
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+
+
 
   @override
   void dispose() {
@@ -243,17 +362,22 @@ class _FilesWidgetState extends State<FilesWidget> {
                         Get.toNamed(Routes.bottombar,
                             arguments: {'currentIndex': 2});
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          border: Border.all(color: Colors.black, width: 1),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Icon(Icons.arrow_back,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 24),
+                      child: InkWell(
+                        onTap: () {
+                          Get.offNamed(Routes.viewcase);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                FlutterFlowTheme.of(context).secondaryBackground,
+                            border: Border.all(color: Colors.black, width: 1),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(Icons.arrow_back,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                size: 24),
+                          ),
                         ),
                       ),
                     ),
@@ -291,35 +415,36 @@ class _FilesWidgetState extends State<FilesWidget> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  setState(() {
-                                    fileUploadCameraProgress = true;
-                                    fileUploadProgress = true;
-                                    _model.fileUploadProgress = true;
-                                  });
+                                  // setState(() {
+                                  //   fileUploadCameraProgress = true;
+                                  //   fileUploadProgress = true;
+                                  //   _model.fileUploadProgress = true;
+                                  // });
 
-                                  result = await FilePicker.platform.pickFiles(
-                                    allowMultiple: true,
-                                    type: FileType.any,
-                                  );
+                                  // result = await FilePicker.platform.pickFiles(
+                                  //   allowMultiple: true,
+                                  //   type: FileType.any,
+                                  // );
 
-                                  if (result != null) {
-                                    List<XFile> files2 = result!.paths
-                                        .map((path) => XFile(path!))
-                                        .toList();
-                                    var maxImages = min(files2.length, 5);
+                                  // if (result != null) {
+                                  //   List<XFile> files2 = result!.paths
+                                  //       .map((path) => XFile(path!))
+                                  //       .toList();
+                                  //   var maxImages = min(files2.length, 5);
 
-                                    for (var i = 0; i < maxImages; i++) {
-                                      await _model.uploadFile(file: files2[i]);
-                                    }
-                                  }
+                                  //   for (var i = 0; i < maxImages; i++) {
+                                  //     await _uploadFile(file: files2[i]);
+                                  //   }
+                                  // }
 
-                                  setState(() {
-                                    fileUploadCameraProgress = false;
-                                    fileUploadProgress = false;
-                                    _model.fileUploadProgress = false;
-                                  });
+                                  // setState(() {
+                                  //   fileUploadCameraProgress = false;
+                                  //   fileUploadProgress = false;
+                                  //   _model.fileUploadProgress = false;
+                                  // });
 
-                                  await fetchdata();
+                                  // await fetchdata();
+                                  _uploadFile();
                                 },
                                 child: Container(
                                   decoration:
@@ -327,15 +452,35 @@ class _FilesWidgetState extends State<FilesWidget> {
                                   child: Padding(
                                     padding: EdgeInsets.all(8),
                                     child: Row(
-                                      children: [
-                                        Icon(Icons.add,
-                                            color: Colors.white, size: 18),
-                                        Text('Upload',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16)),
-                                      ],
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isUploading)
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              else
+                                Icon(Icons.add, color: Colors.white, size: 18),
+                              SizedBox(
+                                  width:
+                                      8), // Spacing between icon/loading and text
+                              Text(
+                                isUploading ? 'Uploading...' : 'Upload',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'DM Sans',
+                                      color: Colors.white,
+                                      letterSpacing: 0,
+                                      fontWeight: FontWeight.w400,
                                     ),
+                              ),
+                            ],
+                          ),
                                   ),
                                 ),
                               ),

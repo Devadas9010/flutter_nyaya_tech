@@ -39,6 +39,9 @@ class FileComponent extends StatelessWidget {
       onTap: () {
         SharedPrefernce.setfileId(doc.id.toString());
         Get.toNamed(Routes.preview);
+        print('s3url -- ${SharedPrefernce.gets3Url()}');
+        print('filename --${SharedPrefernce.getfileName()}');
+        print('fileKey --${SharedPrefernce.getfileKey()}');
       },
       child: Container(
         decoration: BoxDecoration(
@@ -56,7 +59,7 @@ class FileComponent extends StatelessWidget {
                   alignment: const AlignmentDirectional(0, 0),
                   child: isImageFile
                       ? Image.network(
-                          doc.key.toString(),
+                          doc.downloadUrl.toString(),
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Icon(Icons.broken_image, size: 48),

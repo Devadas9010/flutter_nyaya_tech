@@ -252,6 +252,7 @@ class _StatusProductsWidgetState extends State<StatusProductsWidget> {
                                                   Builder(
                                                     builder: (context) {
                                                       final preBoardingStages = _model.stagesdata!
+                                                      
                                                           .where((stage) => stage.stage == 'Pre-boarding')
                                                           .toList();
                                                       final anyCompleted =

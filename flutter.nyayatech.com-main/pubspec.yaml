@@ -86,6 +86,9 @@ dependencies:
   firebase_crashlytics: ^4.3.2
   easy_stepper: ^0.8.3
   timeline_tile: ^2.0.0
+  flutter_downloader: ^1.11.8
+  dio: ^5.8.0+1
+  device_info_plus: ^11.3.0
 dependency_overrides:
   http: 1.2.2
   uuid: ^4.0.0

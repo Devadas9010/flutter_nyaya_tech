@@ -9,6 +9,9 @@ class SharedPrefernce {
   static const String caseId = 'caseId';
   static const String notesId = 'notesId';
   static const String fileId = 'fileId';
+  static const String fileName = 'fileName';
+  static const String downloadfileName = 'downloadfileName';
+  static const String fileSize = 'fileSize';
   static const String email = 'email';
   static const String summarydate = 'summaryDate';
   static const String summaryid = 'summaryId';
@@ -26,6 +29,7 @@ class SharedPrefernce {
   static const String summarydateUp = 'summarydateup';
   static const String summaryText = 'summaryText';
   static const String s3Url = 's3Url';
+  static const String downloadS3Url = 'downloadS3Url';
   static const String fileKey = 'fileKey';
   static const String commentId = 'commentId';
   static const String userName = 'userName';
@@ -96,6 +100,32 @@ class SharedPrefernce {
 
   ///Method that returns the [fileId].
   static String getfileId() => preferences.getString(fileId) ?? '';
+
+
+///Method that saves the [fileName].
+  static Future<bool> setfileName(String value) async =>
+      preferences.setString(fileName, value);
+
+  ///Method that returns the [fileName].
+  static String getfileName() => preferences.getString(fileName) ?? '';
+
+
+///Method that saves the [downloadfileName].
+  static Future<bool> setdownloadfileName(String value) async =>
+      preferences.setString(downloadfileName, value);
+
+  ///Method that returns the [fileName].
+  static String getdownloadfileName() => preferences.getString(downloadfileName) ?? '';
+
+
+  ///Method that saves the [fileSize].
+  static Future<bool> setfileSize(int value) async =>
+      preferences.setInt(fileSize, value);
+
+  ///Method that returns the [fileSize].
+  static int getfileSize() => preferences.getInt(fileSize) ?? 0;
+
+
 
   ///Method that saves the [summarydate].
   static Future<bool> setSummary(String value) async =>
@@ -201,6 +231,18 @@ class SharedPrefernce {
 
   ///Method that returns the [s3Url].
   static String gets3Url() => preferences.getString(s3Url) ?? '';
+
+
+
+  ///Method that saves the [downloadS3Url].
+  static Future<bool> setsdownloadS3Url(String value) async =>
+      preferences.setString(downloadS3Url, value);
+
+  ///Method that returns the [s3Url].
+  static String getsdownloadS3Url() => preferences.getString(downloadS3Url) ?? '';
+
+
+
 
   ///Method that saves the [fileKey].
   static Future<bool> setfileKey(String value) async =>
